@@ -15,20 +15,24 @@ class TextEnum(StrEnum):
     schedule_button = 'кнопка Расписание'
     map = 'Карта'
     map_button = 'Карта'
-    section = 'Текст к секциям карты'
-    section_button = 'кнопка Секции карты'
-    activity = 'Текст к активностям карты'
-    activity_button = 'кнопка Активностям карты'
+    section = 'Текст к секциям'
+    section_button = 'кнопка Секции'
     memo = 'Памятка участников'
     memo_button = 'кнопка Памятка'
     chat_link = 'Ссылка на чат по секциям'
     phone_number = 'Номер телефона'
     phone_button = 'Кнопка ТГ аккаунт'
     tg_link = 'Ссылка на тг аккаунт'
+    tg_channel_button = 'кнопка Канал'
+    tg_channel_link = 'Ссылка на тг группу'
     faq_button = 'кнопка FAQ'
     support_button = 'кнопка Поддержка'
     lang_button = 'кнопка Смены языка'
     chat_button = 'кнопка Чат по секциям'
+    map_in_button = 'кнопка внутри карт'
+    map_in_button_link = 'ссылка на кнопку внутри карт',
+    section_leading_button = 'кнопка Ведущие секции'
+    section_schedule_button = 'кнопка Расписание секции',
 
 
 default_texts = {
@@ -44,20 +48,24 @@ default_texts = {
     TextEnum.schedule_button: 'Расписание',
     TextEnum.map: 'Карта',
     TextEnum.map_button: 'кнопка Карта',
-    TextEnum.section: 'Текст к секциям карты',
+    TextEnum.section: 'Текст к секциям',
     TextEnum.section_button: 'Секции',
-    TextEnum.activity: 'Текст к активностям карты',
-    TextEnum.activity_button: 'Активности',
     TextEnum.memo: 'Информация',
     TextEnum.memo_button: 'Памятка участников',
     TextEnum.chat_link: 'https://t.me/verhovv',
     TextEnum.phone_number: '+7 (984) 153 97-68',
     TextEnum.phone_button: 'Телеграм аккаунт',
     TextEnum.tg_link: 'https://t.me/verhovv',
+    TextEnum.tg_channel_button: 'Канал',
+    TextEnum.tg_channel_link: 'https://t.me/verhovv',
     TextEnum.support_button: 'Поддержка',
     TextEnum.lang_button: 'RU',
     TextEnum.faq_button: 'FAQ',
-    TextEnum.chat_button: 'Чат по секциям'
+    TextEnum.chat_button: 'Чат по секциям',
+    TextEnum.map_in_button: 'План здания',
+    TextEnum.map_in_button_link: 'https://t.me/verhovv.ru',
+    TextEnum.section_leading_button: 'Ведущие',
+    TextEnum.section_schedule_button: 'Расписание'
 }
 
 

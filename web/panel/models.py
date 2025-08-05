@@ -32,6 +32,7 @@ class JobTitle(models.Model):
 
 
 class Contact(models.Model):
+    section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True, verbose_name='Секция')
     job_title = models.ForeignKey(JobTitle, on_delete=models.SET_NULL, null=True, verbose_name='Сфера/Должность')
     ru_fio = models.CharField('ФИО на русском')
     en_fio = models.CharField('ФИО на английском')
@@ -39,6 +40,19 @@ class Contact(models.Model):
     link = models.CharField('Ссылка на соц сети')
     ru_description = models.TextField('Описание на русском')
     en_description = models.TextField('Описание на английском')
+
+    file = models.FileField('Изображение', null=True, blank=True, upload_to='web/media/files')
+    file_id = models.CharField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        try:
+            if self.pk:
+                old_photo = Contact.objects.get(pk=self.pk).file
+                if old_photo != self.file:
+                    self.file_id = None
+        except:
+            pass
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Контакт'
@@ -62,20 +76,6 @@ class FAQ(models.Model):
         return self.ru_question
 
 
-class Schedule(models.Model):
-    ru_name = models.CharField('Название на русском')
-    en_name = models.CharField('Название на английском')
-    ru_description = models.TextField('Описание на русском')
-    en_description = models.TextField('Описание на английском')
-
-    class Meta:
-        verbose_name = 'Расписание'
-        verbose_name_plural = 'Расписание'
-
-    def __str__(self):
-        return self.ru_name
-
-
 class Section(models.Model):
     ru_name = models.CharField('Название на русском')
     en_name = models.CharField('Название на английском')
@@ -90,15 +90,31 @@ class Section(models.Model):
         return self.ru_name
 
 
-class Activity(models.Model):
+class Schedule(models.Model):
     ru_name = models.CharField('Название на русском')
     en_name = models.CharField('Название на английском')
     ru_description = models.TextField('Описание на русском')
     en_description = models.TextField('Описание на английском')
 
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Секция')
+    date = models.DateField('Дата проведения', null=True, blank=True)
+
+    file = models.FileField('Изображение', null=True, blank=True, upload_to='web/media/files')
+    file_id = models.CharField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        try:
+            if self.pk:
+                old_photo = Schedule.objects.get(pk=self.pk).file
+                if old_photo != self.file:
+                    self.file_id = None
+        except:
+            pass
+        super().save(*args, **kwargs)
+
     class Meta:
-        verbose_name = 'Активность мероприятий'
-        verbose_name_plural = 'Активности мероприятий'
+        verbose_name = 'Расписание'
+        verbose_name_plural = 'Расписание'
 
     def __str__(self):
         return self.ru_name

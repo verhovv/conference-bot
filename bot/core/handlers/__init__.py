@@ -1,7 +1,6 @@
 from aiogram import Router, Bot, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters.command import CommandStart
-from bot.core.utils import message_process
 from bot.core import keyboards
 from bot.core.keyboards import CallbackData
 
@@ -16,6 +15,7 @@ from .support import router as support_router
 from .map import router as map_router
 from .memo import router as memo_router
 from .faq import router as faq_router
+from .sections import router as sections_router
 
 router = Router()
 router.include_routers(
@@ -26,7 +26,8 @@ router.include_routers(
     support_router,
     map_router,
     memo_router,
-    faq_router
+    faq_router,
+    sections_router
 )
 
 

@@ -38,12 +38,7 @@ class JobTitleAdmin(admin.ModelAdmin):
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(Activity)
-class ActivityAdmin(admin.ModelAdmin):
-    pass
+    exclude = ('file_id',)
 
 
 @admin.register(Section)
@@ -71,4 +66,4 @@ class TextAdmin(admin.ModelAdmin):
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
-    pass
+    exclude = ('file_id',)

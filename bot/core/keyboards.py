@@ -1,8 +1,12 @@
 from enum import StrEnum, unique, auto
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import datetime
+
+from asgiref.sync import sync_to_async
+
 from bot.core.texts import get_text, TextEnum
-from web.panel.models import User, JobTitle, Contact, Schedule, Activity, Section, FAQ
+from web.panel.models import User, JobTitle, Contact, Schedule, Section, FAQ
 
 
 @unique
@@ -11,6 +15,8 @@ class CallbackData(StrEnum):
     information = auto()
     contacts = auto()
     schedule = auto()
+    schedule_days = auto()
+    schedule_sections = auto()
     map = auto()
     memo = auto()
     support = auto()
@@ -49,6 +55,16 @@ async def main_menu(user: User):
                     callback_data=CallbackData.memo
                 ),
                 InlineKeyboardButton(
+                    text=await get_text(text_enum=TextEnum.section_button, user=user),
+                    callback_data=CallbackData.section
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=await get_text(text_enum=TextEnum.tg_channel_button, user=user),
+                    url=await get_text(text_enum=TextEnum.tg_channel_link, user=user)
+                ),
+                InlineKeyboardButton(
                     text=await get_text(text_enum=TextEnum.chat_button, user=user),
                     url=await get_text(text_enum=TextEnum.chat_link, user=user)
                 )
@@ -78,14 +94,8 @@ async def map(user: User):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text=await get_text(text_enum=TextEnum.section_button, user=user),
-                    callback_data=CallbackData.section
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text=await get_text(text_enum=TextEnum.activity_button, user=user),
-                    callback_data=CallbackData.activity
+                    text=await get_text(text_enum=TextEnum.map_in_button, user=user),
+                    url=await get_text(text_enum=TextEnum.map_in_button_link, user=user)
                 )
             ],
             [await main_menu_button(user=user)]
@@ -138,7 +148,33 @@ async def section_list(user: User):
 
 async def section(user: User):
     return InlineKeyboardMarkup(
-        inline_keyboard=[
+        inline_keyboard=
+        [[InlineKeyboardButton(
+            text=s.ru_name if not user.lang else s.en_name,
+            callback_data=f'section_{s.id}'
+        )] async for s in Section.objects.all()] \
+        + [
+            [await main_menu_button(user)]
+        ]
+    )
+
+
+async def c_section(user: User, s: Section):
+    return InlineKeyboardMarkup(
+        inline_keyboard=
+        [
+            [
+                InlineKeyboardButton(
+                    text=await get_text(text_enum=TextEnum.section_schedule_button, user=user),
+                    callback_data=f'sec_sch_{s.id}'
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=await get_text(text_enum=TextEnum.section_leading_button, user=user),
+                    callback_data=f'sec_lead_{s.id}'
+                )
+            ],
             [
                 InlineKeyboardButton(
                     text=await get_text(text_enum=TextEnum.back_button, user=user),
@@ -147,31 +183,6 @@ async def section(user: User):
             ],
             [await main_menu_button(user)]
         ]
-    )
-
-
-async def activity_list(user: User):
-    keyboard = []
-
-    async for a in Activity.objects.all():
-        keyboard.append(
-            [
-                InlineKeyboardButton(
-                    text=a.ru_name if not user.lang else a.en_name,
-                    callback_data=f'activity_{a.id}'
-                )
-            ]
-        )
-
-    keyboard.append([
-        InlineKeyboardButton(
-            text=await get_text(text_enum=TextEnum.back_button, user=user),
-            callback_data=CallbackData.map
-        )
-    ])
-    keyboard.append([await main_menu_button(user)])
-    return InlineKeyboardMarkup(
-        inline_keyboard=keyboard
     )
 
 
@@ -189,10 +200,47 @@ async def activity(user: User):
     )
 
 
-async def schedule_list(user: User):
+async def schedule_mode(user: User):
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text='По дням', callback_data=CallbackData.schedule_days)],
+            [InlineKeyboardButton(text='По секциям', callback_data=CallbackData.schedule_sections)],
+            [await main_menu_button(user)]
+        ]
+    )
+
+
+async def schedule_dates(user: User):
     keyboard = []
 
-    async for s in Schedule.objects.all():
+    async for date in Schedule.objects.values_list('date', flat=True).order_by('date').distinct():
+        keyboard.append(
+            [
+                InlineKeyboardButton(
+                    text=date.strftime('%d.%m.%Y'),
+                    callback_data=f'schedule_date_{date.toordinal()}'
+                )
+            ]
+        )
+
+    keyboard.append(
+        [
+            InlineKeyboardButton(
+                text=await get_text(text_enum=TextEnum.back_button, user=user),
+                callback_data=CallbackData.schedule
+            )
+        ]
+    )
+    keyboard.append([await main_menu_button(user)])
+    return InlineKeyboardMarkup(
+        inline_keyboard=keyboard
+    )
+
+
+async def schedule_dates_list(user: User, date: datetime.date):
+    keyboard = []
+
+    async for s in Schedule.objects.filter(date=date):
         keyboard.append(
             [
                 InlineKeyboardButton(
@@ -202,23 +250,107 @@ async def schedule_list(user: User):
             ]
         )
 
+    keyboard.append(
+        [
+            InlineKeyboardButton(
+                text=await get_text(text_enum=TextEnum.back_button, user=user),
+                callback_data=CallbackData.schedule_days
+            )
+        ]
+    )
+
     keyboard.append([await main_menu_button(user)])
     return InlineKeyboardMarkup(
         inline_keyboard=keyboard
     )
 
 
-async def schedule(user: User):
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
+async def schedule_sections(user: User):
+    keyboard = []
+
+    date: datetime.date
+    async for sc in Schedule.objects.filter(section__isnull=False).distinct('section_id'):
+        s = await sync_to_async(lambda: sc.section)()
+        keyboard.append(
             [
                 InlineKeyboardButton(
-                    text=await get_text(text_enum=TextEnum.back_button, user=user),
-                    callback_data=CallbackData.schedule
+                    text=s.ru_name if not user.lang else s.en_name,
+                    callback_data=f'schedule_section_{s.id}'
                 )
-            ],
-            [await main_menu_button(user)]
+            ]
+        )
+
+    keyboard.append(
+        [
+            InlineKeyboardButton(
+                text=await get_text(text_enum=TextEnum.back_button, user=user),
+                callback_data=CallbackData.schedule
+            )
         ]
+    )
+
+    keyboard.append([await main_menu_button(user)])
+    return InlineKeyboardMarkup(
+        inline_keyboard=keyboard
+    )
+
+
+async def schedule_sections_list(user: User, se: Section):
+    keyboard = []
+
+    async for s in Schedule.objects.filter(section=se):
+        keyboard.append(
+            [
+                InlineKeyboardButton(
+                    text=s.ru_name if not user.lang else s.en_name,
+                    callback_data=f'schedule_{s.id}'
+                )
+            ]
+        )
+
+    keyboard.append(
+        [
+            InlineKeyboardButton(
+                text=await get_text(text_enum=TextEnum.back_button, user=user),
+                callback_data=CallbackData.schedule_sections
+            )
+        ]
+    )
+
+    keyboard.append([await main_menu_button(user)])
+    return InlineKeyboardMarkup(
+        inline_keyboard=keyboard
+    )
+
+
+async def schedule(user: User, s: Schedule):
+    inline_keyboard = []
+
+    if s.date:
+        inline_keyboard.append(
+            [
+                InlineKeyboardButton(
+                    text='В этот же день',
+                    callback_data=f'schedule_date_{s.date.toordinal()}'
+                )
+            ]
+        )
+
+    se = await sync_to_async(lambda: s.section)()
+    if se:
+        inline_keyboard.append(
+            [
+                InlineKeyboardButton(
+                    text='В этой же секции',
+                    callback_data=f'schedule_section_{await sync_to_async(lambda: se.id)()}'
+                )
+            ]
+        )
+
+    inline_keyboard.append([await main_menu_button(user)])
+
+    return InlineKeyboardMarkup(
+        inline_keyboard=inline_keyboard
     )
 
 
