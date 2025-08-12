@@ -214,6 +214,9 @@ async def schedule_dates(user: User):
     keyboard = []
 
     async for date in Schedule.objects.values_list('date', flat=True).order_by('date').distinct():
+        if not date:
+            return
+
         keyboard.append(
             [
                 InlineKeyboardButton(
@@ -270,6 +273,9 @@ async def schedule_sections(user: User):
 
     date: datetime.date
     async for sc in Schedule.objects.filter(section__isnull=False).distinct('section_id'):
+        if not sc:
+            return
+
         s = await sync_to_async(lambda: sc.section)()
         keyboard.append(
             [
