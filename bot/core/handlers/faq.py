@@ -12,7 +12,7 @@ router = Router()
 @router.callback_query(F.data == CallbackData.FAQ)
 async def faq_list(callback: CallbackQuery, user: User):
     await callback.message.answer(
-        text=await get_text(text_enum=TextEnum.schedule, user=user),
+        text=await get_text(text_enum=TextEnum.faq, user=user),
         reply_markup=await keyboards.faq_list(user=user)
     )
 

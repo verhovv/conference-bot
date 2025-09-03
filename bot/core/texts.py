@@ -26,6 +26,7 @@ class TextEnum(StrEnum):
     tg_channel_button = 'кнопка Канал'
     tg_channel_link = 'Ссылка на тг группу'
     faq_button = 'кнопка FAQ'
+    faq = 'текст FAQ'
     support_button = 'кнопка Поддержка'
     lang_button = 'кнопка Смены языка'
     chat_button = 'кнопка Чат по секциям'
@@ -61,6 +62,7 @@ default_texts = {
     TextEnum.support_button: 'Поддержка',
     TextEnum.lang_button: 'RU',
     TextEnum.faq_button: 'FAQ',
+    TextEnum.faq: 'FAQ',
     TextEnum.chat_button: 'Чат по секциям',
     TextEnum.map_in_button: 'План здания',
     TextEnum.map_in_button_link: 'https://t.me/verhovv.ru',
